@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d1014">
+<meta name="description" content="Multi-city weather forecasting with a neural network running in your browser, with calibrated uncertainty intervals.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=5">
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+<title>DeepWeather — multi-city neural forecasting</title>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ══ HEADER ══ -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">DeepWeather</span>
+    </div>
+    <div class="model-chip" id="modelChip" title="Neural network status">
+      <span class="dot" id="modelDot"></span><span id="modelState">loading model</span>
+    </div>
+  </header>
+
+  <!-- ══ CITY SELECTOR ══ -->
+  <div class="cityrow" id="cityRow" role="tablist" aria-label="Select city"></div>
+
+  <main>
+
+    <!-- ══ NOW ══ -->
+    <section id="now" class="section">
+      <div class="hero card" id="hero">
+        <div class="hero-loading" id="heroLoading">
+          <div class="skel skel-line skel-w40"></div>
+          <div class="skel skel-line skel-w30"></div>
+          <div class="skel skel-temp"></div>
+          <div class="skel skel-line skel-w60"></div>
+        </div>
+        <div class="hero-body" id="heroBody" hidden>
+          <div class="hero-top">
+            <div>
+              <div class="hero-city" id="heroCity">—</div>
+              <div class="hero-time" id="heroTime">—</div>
+            </div>
+            <div class="hero-cond" id="heroCond">—</div>
+          </div>
+          <div class="hero-temp"><span id="heroTemp">—</span><span class="deg">°</span></div>
+          <div class="hero-range" id="heroRange">—</div>
+        </div>
+      </div>
+
+      <div class="statgrid" id="statGrid"></div>
+    </section>
+
+    <!-- ══ FORECAST ══ -->
+    <section id="forecast" class="section">
+      <div class="sec-head">
+        <h2>Next 24 hours</h2>
+        <p class="sec-sub">Neural network forecast with a 90% prediction interval, against the numerical weather model.</p>
+      </div>
+
+      <div class="card chart-card">
+        <div class="legend" id="legend">
+          <span class="lg"><i class="swatch band"></i>90% interval</span>
+          <span class="lg"><i class="swatch s1"></i>Neural net</span>
+          <span class="lg"><i class="swatch s2"></i>Weather model</span>
+        </div>
+        <div class="chart-wrap">
+          <svg id="fcChart" class="chart" role="img" aria-label="24 hour temperature forecast"></svg>
+          <div class="tooltip" id="fcTip" hidden></div>
+        </div>
+        <div class="chart-note" id="fcNote">
+          The interval widens with lead time because uncertainty grows — calibrated per hour by conformal prediction.
+        </div>
+      </div>
+
+      <details class="card disclosure">
+        <summary>How this forecast is made</summary>
+        <p>A recurrent neural network (LSTM) runs <strong>entirely in your browser</strong> via ONNX Runtime — no server, and it works offline once loaded. It reads the last 168 hours of conditions (14 derived variables including potential temperature, vapour pressure and air density) and predicts hour by hour.</p>
+        <p>The shaded band is a <strong>conformal prediction interval</strong> calibrated per forecast hour, so roughly 90 out of 100 actual temperatures should fall inside it. Widths come from the dissertation's calibration: ±1.26 °C at 1 hour, widening to ±4.81 °C at 24 hours.</p>
+        <p class="muted">The in-browser model was trained on a single city (Jena) and is applied to all five here — a practical test of the cross-city generalisation question this project studies.</p>
+      </details>
+    </section>
+
+    <!-- ══ CITIES ══ -->
+    <section id="cities" class="section">
+      <div class="sec-head">
+        <h2>Five cities at once</h2>
+        <p class="sec-sub">The next 24 hours in every city side by side — the same question this project asks of the models.</p>
+      </div>
+      <div class="spark-grid" id="sparkGrid"></div>
+
+      <div class="card insight" style="margin-top:12px">
+        <h3>Same day, five different shapes</h3>
+        <p>Each panel is the coming 24 hours on its own temperature scale, so you're comparing the <strong>shape</strong> of the day rather than who is warmest. Peaks land at different hours, and the daily swing is far larger in some cities than others.</p>
+        <p>A pooled model has to reproduce all five of these patterns with one set of weights. That it manages to — matching five specialised models — is the central result here.</p>
+      </div>
+
+      <div class="sec-head" style="margin-top:26px">
+        <h2>Climate range</h2>
+        <p class="sec-sub">Ten years of history behind each city.</p>
+      </div>
+      <div class="citygrid" id="cityGrid"></div>
+
+      <div class="card insight">
+        <h3>Why these five</h3>
+        <p>Daily temperatures in Jena, London, New York and Tokyo move together (correlation +0.81 to +0.90). <strong>Sydney runs opposite</strong> — about −0.8 against all of them — because its seasons are reversed.</p>
+        <p>That contrast is the point: it makes "does pooling cities help?" a question worth asking rather than a foregone conclusion.</p>
+      </div>
+    </section>
+
+    <!-- ══ MODELS ══ -->
+    <section id="models" class="section">
+      <div class="sec-head">
+        <h2>Model results</h2>
+        <p class="sec-sub">Mean absolute error on held-out test data, all five cities, 24-hour horizon.</p>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-wrap">
+          <svg id="mdChart" class="chart" role="img" aria-label="Model comparison by mean absolute error"></svg>
+          <div class="tooltip" id="mdTip" hidden></div>
+        </div>
+        <div class="chart-note">Lower is better. Bars in blue are the models built for this project; grey are reference baselines. Every model was tuned by a grid search on validation data, so no method has an unfair advantage.</div>
+      </div>
+
+      <div class="findings">
+        <div class="card finding">
+          <div class="f-label">Multi-city vs single-city</div>
+          <div class="f-value">1.268 <span class="vs">vs</span> 1.272</div>
+          <p>One pooled model trained on all five cities matches five separate per-city models almost exactly. Pooling doesn't cost accuracy — and leaves one model to maintain instead of five.</p>
+        </div>
+        <div class="card finding">
+          <div class="f-label">Best model</div>
+          <div class="f-value">1.247 <span class="unit">°C</span></div>
+          <p>The Temporal Fusion Transformer leads — but only just. With every model given an equivalent grid search, the top three sit within 0.02 °C of each other.</p>
+        </div>
+        <div class="card finding">
+          <div class="f-label">Interval coverage</div>
+          <div class="f-value">90–93<span class="unit">%</span></div>
+          <p>Conformal intervals hold their promised coverage at every one of the 24 forecast hours, not just on average.</p>
+        </div>
+      </div>
+
+      <details class="card disclosure">
+        <summary>Table view</summary>
+        <table class="dtable" id="modelTable"></table>
+      </details>
+    </section>
+
+    <footer class="foot">
+      <p>MSc research project — multi-city probabilistic weather forecasting.<br>
+      Live conditions from Open-Meteo. Neural inference runs on your device.</p>
+    </footer>
+
+  </main>
+
+  <!-- ══ NAV ══ -->
+  <nav class="bottomnav">
+    <button class="nav-btn is-active" data-target="now"><span class="ico">◉</span>Now</button>
+    <button class="nav-btn" data-target="forecast"><span class="ico">◠</span>Forecast</button>
+    <button class="nav-btn" data-target="cities"><span class="ico">◍</span>Cities</button>
+    <button class="nav-btn" data-target="models"><span class="ico">▤</span>Models</button>
+  </nav>
+
+</div>
+
+<script src="app.js?v=5"></script>
+</body>
+</html>
