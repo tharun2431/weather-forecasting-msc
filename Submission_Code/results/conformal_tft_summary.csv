@@ -1,0 +1,2 @@
+model,alpha,target_coverage,empirical_coverage,avg_width,q_hat,test_mae
+tft,0.1,0.9,0.9321,7.3487,3.6743,1.4072

@@ -1,0 +1,2 @@
+model,MAE,RMSE,R2,lr,hidden,full_data
+TFT-v2-final,1.2472,1.7455,0.9532,0.03,32,True

@@ -1,0 +1,9 @@
+TFT encoder (rank order),Permutation (rank order)
+water_vapour,temp_roll_24h
+temperature,temperature
+wind_direction,wet_bulb_temp
+wind_speed,hour_sin
+hour_sin,temp_lag_6h
+pressure_msl,temp_roll_6h
+wind_v,dayofyear_cos
+surface_pressure,hour_cos

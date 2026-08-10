@@ -1,0 +1,4 @@
+model,tuned_params,configs_tried,test_MAE
+LSTM,"lr=0.003, hidden=128",8,1.2659
+Gradient boosting,"lr=0.05, iters=400, leaves=63",12,1.2633
+TFT,"lr=0.03, hidden=32",lr search (3e-4 -> 0.03),1.2472

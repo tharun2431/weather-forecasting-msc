@@ -1,0 +1,11 @@
+feature,mae_increase
+temp_roll_24h,1.2747
+temperature,1.2471
+wet_bulb_temp,0.6751
+hour_sin,0.6455
+temp_lag_6h,0.5298
+temp_roll_6h,0.4447
+dayofyear_cos,0.3793
+hour_cos,0.3631
+water_vapour,0.3065
+soil_temperature,0.295

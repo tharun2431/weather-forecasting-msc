@@ -1,0 +1,2 @@
+model,city,MAE,RMSE,R2,seq_len,pred_steps,features
+TFT,All 5,1.526,2.125,0.9306,168,24,23

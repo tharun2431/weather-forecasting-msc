@@ -1,0 +1,7 @@
+city,baseline_mae,aligned_mae,change
+Jena,1.281,1.301,0.021
+London,1.197,1.211,0.014
+New_York,1.515,1.494,-0.021
+Sydney,1.176,1.168,-0.009
+Tokyo,1.153,1.094,-0.059
+ALL,1.264,1.254,-0.011

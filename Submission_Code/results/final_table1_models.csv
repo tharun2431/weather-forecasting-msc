@@ -1,0 +1,8 @@
+Model,Test MAE (C),Type,Search
+TFT,1.247,tuned,learning rate search
+Gradient boosting,1.263,tuned,12 configs
+LSTM,1.266,tuned,8 configs
+Linear regression,1.575,baseline,-
+Seasonal naive,2.091,baseline,-
+Climatology,2.47,baseline,-
+Persistence,2.935,baseline,-

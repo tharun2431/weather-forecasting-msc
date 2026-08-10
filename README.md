@@ -2,7 +2,7 @@
 
 Multi-city weather forecasting that runs a neural network in your browser.
 
-**Live:** https://tharun-source24.github.io/weather-forecasting-msc/
+**Live:** https://tharun2431.github.io/weather-forecasting-msc/
 
 Pick one of five cities and it produces a 24-hour temperature forecast, with a
 calibrated uncertainty band around it. The model runs on your device. Nothing is
@@ -94,6 +94,31 @@ and there is no meaningful accuracy difference between them.
 Conformal intervals hold between 90 and 93 per cent empirical coverage at every
 one of the 24 horizons, widening from about plus or minus 1.26 degrees at one
 hour ahead to plus or minus 4.81 degrees at twenty-four.
+
+## Dissertation code
+
+The research code behind this artefact is in [`Submission_Code/`](Submission_Code/).
+It is the code submission for the MSc dissertation and the notebooks are stored with
+their cell outputs intact, so the results can be read without re-running anything.
+
+| Folder | What is in it |
+|---|---|
+| `notebooks/` | 14 Jupyter notebooks, all executed, covering exploration, baselines, the deep models, the hyperparameter search, conformal prediction and explainability |
+| `scripts/` | 4 supporting scripts, including the checkpoint evaluation and the converged LSTM comparison |
+| `results/` | every results CSV the report's tables are built from |
+| `figures/` | the figures used in the report |
+| `best_model/` | the trained Temporal Fusion Transformer checkpoint, so `16_tft_evaluation.ipynb` reproduces the reported 1.247 without a GPU |
+| `not_executed_remote/` | 2 notebooks that cannot be re-run, each explaining why in its own first cell |
+
+`Submission_Code/README.md` describes what each notebook does and which result file
+supports each claim in the report.
+
+## Data
+
+The full dataset is mirrored at
+[kaggle.com/datasets/tharun2431/multi-city-weather-2000-2009](https://www.kaggle.com/datasets/tharun2431/multi-city-weather-2000-2009).
+It was retrieved from the Open-Meteo historical API, described under Data and
+attribution below.
 
 ## Data and attribution
 

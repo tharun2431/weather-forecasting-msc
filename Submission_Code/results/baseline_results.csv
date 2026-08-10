@@ -1,0 +1,8 @@
+model,MAE,RMSE,R2
+Gradient boosting,1.258,1.7624,0.952
+LSTM,1.39,1.92,0.94
+TFT (tuned),1.53,2.16,0.93
+Linear regression,1.5748,2.161,0.9278
+Seasonal naive,2.0912,2.8886,0.8709
+Climatology,2.4698,3.2672,0.8349
+Persistence,2.9351,3.86,0.7695

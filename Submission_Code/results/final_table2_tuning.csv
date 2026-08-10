@@ -1,0 +1,4 @@
+Model,Untuned MAE,Tuned MAE,Change %
+TFT,1.53,1.247,-18.5
+Gradient boosting,1.286,1.263,-1.8
+LSTM,1.39,1.266,-8.9

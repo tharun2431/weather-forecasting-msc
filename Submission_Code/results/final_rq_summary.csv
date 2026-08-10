@@ -1,0 +1,5 @@
+RQ,Question,Answer
+RQ1,Can a TFT outperform an LSTM?,Yes but narrowly - TFT 1.247 vs LSTM 1.266 once both are tuned (1.5% apart)
+RQ2,Do per-city models beat a pooled multi-city model?,"No - pooled 1.2677 vs per-city 1.272, effectively identical"
+RQ3,Which variables drive the forecasts?,Top TFT encoder variable: water_vapour; top by permutation: temp_roll_24h
+RQ4,Can we produce calibrated uncertainty intervals?,Yes - conformal intervals hold 90-93% coverage at every horizon
