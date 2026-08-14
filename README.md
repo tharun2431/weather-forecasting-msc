@@ -48,6 +48,7 @@ roughly 90 per cent all the way out.
 |---|---|
 | `index.html` | the page |
 | `app.js` | fetches conditions, builds features, runs inference, draws the charts |
+| `ui.js` | presentation only, scroll reveal and stagger. Touches nothing app.js owns |
 | `styles.css` | styling |
 | `lstm_model.onnx` | the trained model, about 900 KB |
 | `scaler.json` | fitted means and scales for the 14 input features |
