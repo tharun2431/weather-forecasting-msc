@@ -1,5 +1,5 @@
-const CACHE = 'deepweather-v3';
-const ASSETS = ['./','./index.html','./styles.css','./app.js','./manifest.json',
+const CACHE = 'deepweather-v4';
+const ASSETS = ['./','./index.html','./styles.css','./app.js','./ui.js','./manifest.json',
                 './scaler.json','./lstm_model.onnx','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install', e => {
