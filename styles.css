@@ -141,9 +141,14 @@ body::after{
 .sec-head{margin-bottom:16px;padding:0 2px}
 .sec-head h2{
   font-size:21px;font-weight:650;letter-spacing:-.025em;
-  background:linear-gradient(180deg,#fff,#b9c1cc);
+  background:linear-gradient(105deg,#b9c1cc 0%,#ffffff 42%,#ffffff 52%,#b9c1cc 94%);
+  background-size:280% 100%;background-position:100% 0;
   -webkit-background-clip:text;background-clip:text;color:transparent;
 }
+/* the sheen runs once, when the heading first scrolls into view */
+.reveal.in .sec-head h2,
+.sec-head.reveal.in h2{animation:sheen 1.5s .12s var(--ease) both}
+@keyframes sheen{from{background-position:100% 0}to{background-position:0 0}}
 .sec-sub{font-size:13.5px;color:var(--ink-2);margin-top:5px;line-height:1.55}
 
 /* ── hero ───────────────────────────────────────────────── */
@@ -392,6 +397,18 @@ body::after{
 .nav-btn.is-active::before{transform:translateX(-50%) scaleX(1)}
 .nav-btn.is-active .ico{transform:translateY(-1px) scale(1.12);filter:drop-shadow(0 0 8px var(--accent-glow))}
 .nav-btn:active .ico{transform:scale(.9)}
+
+/* ── section transition on nav ──────────────────────────── */
+/* pressing a nav button scrolls to the section. this gives the arrival a beat
+   of its own so it reads as a transition rather than the page just jumping. */
+.section.pop > *{animation:popIn .55s var(--spring) both}
+.section.pop > *:nth-child(2){animation-delay:.05s}
+.section.pop > *:nth-child(3){animation-delay:.1s}
+.section.pop > *:nth-child(n+4){animation-delay:.15s}
+@keyframes popIn{
+  from{opacity:0;transform:translateY(14px) scale(.985)}
+  to{opacity:1;transform:none}
+}
 
 @media (max-width:420px){
   .statgrid{grid-template-columns:repeat(2,1fr)}

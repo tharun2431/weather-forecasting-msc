@@ -106,6 +106,27 @@ async function loadCity(city){
   return r.json();
 }
 
+// the city's clock, not the viewer's. open-meteo returns timezone=auto data as
+// naive local stamps plus the zone it used, so both of these work off the string.
+function tzLabel(d){
+  // name the city that is actually selected, not the one the IANA zone is named
+  // after - Jena's zone is Europe/Berlin, and "Berlin local time" on the Jena
+  // page just looks like a mistake
+  const abbr = d && d.timezone_abbreviation;
+  const city = current && current.name;
+  if(city && abbr) return `${city} local time (${abbr})`;
+  if(city) return `${city} local time`;
+  return abbr ? `local time (${abbr})` : 'local time';
+}
+
+function localStamp(stamp, d){
+  const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const day  = DAYS[new Date(stamp.slice(0,10) + 'T00:00:00Z').getUTCDay()];
+  const hhmm = stamp.slice(11,16);
+  const abbr = d && d.timezone_abbreviation ? ` (${d.timezone_abbreviation})` : '';
+  return `${day} ${hhmm} local${abbr}`;
+}
+
 const nowIndex = d => {
   const t = d.current.time.slice(0,13);
   const i = d.hourly.time.findIndex(x=>x.slice(0,13)===t);
@@ -139,8 +160,10 @@ function renderNow(city,d){
   body.classList.remove('rise'); void body.offsetWidth; body.classList.add('rise');
   const c = d.current, t = Math.round(c.temperature_2m);
   document.getElementById('heroCity').textContent = `${city.name}, ${city.country}`;
-  document.getElementById('heroTime').textContent =
-    new Date(c.time).toLocaleString([], {weekday:'long', hour:'2-digit', minute:'2-digit'});
+  // open-meteo is called with timezone=auto, so c.time is already the CITY's local
+  // clock as a naive stamp. build the label from the string: handing it to Date()
+  // reinterprets it in whatever zone the viewer happens to be in.
+  document.getElementById('heroTime').textContent = localStamp(c.time, d);
   document.getElementById('heroCond').textContent = WMO[c.weather_code] ?? '—';
   countUp(document.getElementById('heroTemp'), t);
   // past_days shifts the daily arrays back, so find TODAY rather than index 0
@@ -173,7 +196,7 @@ function renderForecast(d, nowIdx, pred){
   const api = [], labels = [];
   for(let i=1;i<=HORIZON;i++){
     api.push(d.hourly.temperature_2m[nowIdx+i]);
-    labels.push(new Date(d.hourly.time[nowIdx+i]).getHours());
+    labels.push(+d.hourly.time[nowIdx+i].slice(11,13));   // city-local hour, read from the stamp
   }
   const n = pred ? Math.min(pred.length, HORIZON) : HORIZON;
   fcData = {pred, api, labels, n};
@@ -236,8 +259,8 @@ function renderForecast(d, nowIdx, pred){
   wireHover(svg, X, Y, n, M, iw, ih);
 
   document.getElementById('fcNote').textContent = pred
-    ? 'The interval widens with lead time because uncertainty grows — calibrated per hour by conformal prediction.'
-    : 'Neural forecast unavailable, showing the numerical weather model only.';
+    ? `Hours are ${tzLabel(d)}. The interval widens with lead time because uncertainty grows, calibrated per hour by conformal prediction.`
+    : `Hours are ${tzLabel(d)}. Neural forecast unavailable, showing the numerical weather model only.`;
 }
 
 function wireHover(svg,X,Y,n,M,iw,ih){
