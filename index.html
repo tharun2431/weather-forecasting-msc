@@ -9,14 +9,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=7">
+<link rel="stylesheet" href="styles.css?v=8">
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
 <title>DeepWeather — multi-city neural forecasting</title>
 </head>
 <body>
+
+<a class="skip" href="#now">Skip to content</a>
 
 <div class="app">
 
@@ -165,16 +164,16 @@
   </main>
 
   <!-- ══ NAV ══ -->
-  <nav class="bottomnav">
-    <button class="nav-btn is-active" data-target="now"><span class="ico">◉</span>Now</button>
-    <button class="nav-btn" data-target="forecast"><span class="ico">◠</span>Forecast</button>
-    <button class="nav-btn" data-target="cities"><span class="ico">◍</span>Cities</button>
-    <button class="nav-btn" data-target="models"><span class="ico">▤</span>Models</button>
+  <nav class="bottomnav" aria-label="Sections">
+    <button class="nav-btn is-active" data-target="now" aria-current="true"><span class="ico" aria-hidden="true">◉</span>Now</button>
+    <button class="nav-btn" data-target="forecast"><span class="ico" aria-hidden="true">◠</span>Forecast</button>
+    <button class="nav-btn" data-target="cities"><span class="ico" aria-hidden="true">◍</span>Cities</button>
+    <button class="nav-btn" data-target="models"><span class="ico" aria-hidden="true">▤</span>Models</button>
   </nav>
 
 </div>
 
-<script src="app.js?v=8"></script>
+<script src="app.js?v=9"></script>
 <script src="ui.js?v=2"></script>
 </body>
 </html>

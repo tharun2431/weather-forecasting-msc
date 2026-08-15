@@ -355,9 +355,21 @@ function renderModels(){
 }
 
 /* ── render: cities ────────────────────────────────────── */
+/* the city cards and sparklines are divs, so a click handler alone leaves them
+   unreachable by keyboard. this wires the whole pattern up in one place. */
+function makeActivatable(el, onActivate, selected){
+  el.setAttribute('role','button');
+  el.setAttribute('tabindex','0');
+  el.setAttribute('aria-pressed', selected ? 'true' : 'false');
+  el.addEventListener('click', onActivate);
+  el.addEventListener('keydown', ev=>{
+    if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); onActivate(); }
+  });
+}
+
 function renderCityTabs(){
   document.getElementById('cityRow').innerHTML = CITIES.map(c=>
-    `<button class="city-tab${c.id===current.id?' is-active':''}" data-id="${c.id}" role="tab">${c.name}</button>`).join('');
+    `<button class="city-tab${c.id===current.id?' is-active':''}" data-id="${c.id}" role="tab" aria-selected="${c.id===current.id}">${c.name}</button>`).join('');
   document.querySelectorAll('.city-tab').forEach(b=>
     b.addEventListener('click',()=>selectCity(CITIES.find(c=>c.id===b.dataset.id))));
 }
@@ -374,7 +386,8 @@ function renderCityGrid(){
     </div>`;
   }).join('');
   document.querySelectorAll('.citycard').forEach(el=>
-    el.addEventListener('click',()=>selectCity(CITIES.find(c=>c.id===el.dataset.id))));
+    makeActivatable(el, ()=>selectCity(CITIES.find(c=>c.id===el.dataset.id)),
+                    el.dataset.id===current.id));
 }
 
 /* five-city small multiples - each city's next 24h on its own scale, so the
@@ -407,7 +420,8 @@ function renderSparks(){
     </div>`;
   }).join('');
   document.querySelectorAll('.spark').forEach(el=>
-    el.addEventListener('click',()=>selectCity(CITIES.find(c=>c.id===el.dataset.id))));
+    makeActivatable(el, ()=>selectCity(CITIES.find(c=>c.id===el.dataset.id)),
+                    el.dataset.id===current.id));
 }
 
 async function loadAllCityTemps(){
@@ -460,7 +474,13 @@ function wireNav(){
   const io = new IntersectionObserver(es=>{
     es.forEach(e=>{
       if(e.isIntersecting){
-        btns.forEach(b=>b.classList.toggle('is-active', b.dataset.target===e.target.id));
+        btns.forEach(b=>{
+          const on = b.dataset.target===e.target.id;
+          b.classList.toggle('is-active', on);
+          // keep the accessible state in step with the visual one
+          if(on) b.setAttribute('aria-current','true');
+          else   b.removeAttribute('aria-current');
+        });
       }
     });
   },{rootMargin:'-45% 0px -50% 0px'});

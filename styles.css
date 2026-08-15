@@ -9,14 +9,21 @@
   --border-str:rgba(255,255,255,.16);
   --ink:#f4f6f8;
   --ink-2:#a9b0bb;
-  --ink-3:#727b87;
+  /* was #727b87 - 4.0:1 on the surface, which fails AA for the 10-12px
+     labels it is used on. #828d9b keeps the muted feel at 5.2:1. */
+  --ink-3:#828d9b;
+  --focus:#7db4f2;
   /* validated categorical slots (dark) - do not repurpose */
   --s1:#3987e5;   /* neural net */
   --s2:#d95926;   /* weather model */
   --band:rgba(57,135,229,.20);
   --accent-glow:rgba(57,135,229,.55);
   --radius:18px;
-  --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  /* Inter came from Google Fonts: a third-party request on every load, and
+     unavailable offline - so the app fell back to an arbitrary system face
+     exactly when it claimed to still work. The native stack is metrically
+     close, always present, and costs no round trip. */
+  --font:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI Variable Text','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
   --nav-h:64px;
   --ease:cubic-bezier(.22,.68,.32,1);
   --spring:cubic-bezier(.16,1.02,.3,1);
@@ -102,11 +109,31 @@ body::after{
   scrollbar-width:none;-ms-overflow-style:none;
 }
 .cityrow::-webkit-scrollbar{display:none}
+
+/* ── focus ──────────────────────────────────────────────────
+   There was no visible focus state anywhere, so keyboard users had no way to
+   tell where they were. :focus-visible keeps pointer clicks unaffected. */
+:where(button,summary,a,[tabindex]):focus-visible{
+  outline:2px solid var(--focus);
+  outline-offset:2px;
+  border-radius:8px;
+}
+.city-tab:focus-visible,.spark:focus-visible,.citycard:focus-visible{outline-offset:3px}
+
+/* skip link - first tab stop, so the city row can be bypassed */
+.skip{
+  position:absolute;left:-9999px;top:8px;z-index:60;
+  background:var(--surface);color:var(--ink);
+  border:1px solid var(--border-str);border-radius:10px;
+  padding:10px 14px;font-size:13.5px;font-weight:550;text-decoration:none;
+}
+.skip:focus{left:16px}
+
 .city-tab{
   flex:0 0 auto;font-family:inherit;font-size:13.5px;font-weight:500;
   color:var(--ink-2);background:var(--surface);
   border:1px solid var(--border);border-radius:999px;
-  padding:9px 16px;cursor:pointer;white-space:nowrap;position:relative;
+  padding:0 16px;min-height:44px;display:inline-flex;align-items:center;cursor:pointer;white-space:nowrap;position:relative;
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   transition:color .22s var(--ease), border-color .22s var(--ease),
              background .28s var(--ease), transform .22s var(--spring),
