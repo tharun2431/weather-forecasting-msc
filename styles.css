@@ -1,23 +1,41 @@
-/* ── tokens ─────────────────────────────────────────────── */
+/* ── tokens ─────────────────────────────────────────────────
+   Light interface. Every colour here is a token so a theme can be swapped
+   without hunting through the file - an earlier version had white gradients
+   and white washes hardcoded into the headings, the stat numbers and the
+   chart bars, all of which vanished the moment the ground went pale. */
 :root{
-  --bg:#080a0e;
-  --bg-2:#0d1014;
-  --surface:rgba(23,27,34,.72);
-  --surface-solid:#171b22;
-  --surface-2:#1c212a;
-  --border:rgba(255,255,255,.08);
-  --border-str:rgba(255,255,255,.16);
-  --ink:#f4f6f8;
-  --ink-2:#a9b0bb;
-  /* was #727b87 - 4.0:1 on the surface, which fails AA for the 10-12px
-     labels it is used on. #828d9b keeps the muted feel at 5.2:1. */
-  --ink-3:#828d9b;
-  --focus:#7db4f2;
-  /* validated categorical slots (dark) - do not repurpose */
-  --s1:#3987e5;   /* neural net */
-  --s2:#d95926;   /* weather model */
-  --band:rgba(57,135,229,.20);
-  --accent-glow:rgba(57,135,229,.55);
+  --bg:#EEF2F6;
+  --bg-2:#E6ECF2;
+  --surface:rgba(255,255,255,.88);
+  --surface-solid:#FFFFFF;
+  --surface-2:#E9EEF3;
+  --border:rgba(15,23,32,.10);
+  --border-str:rgba(15,23,32,.20);
+  --ink:#0F1720;
+  --ink-2:#46586A;
+  /* 5.3:1 on white - the 10-12px labels this is used on need AA */
+  --ink-3:#5B6D7E;
+  --focus:#3A2ABF;
+  --bar-muted:rgba(15,23,32,.14);
+  --sheen-a:#0F1720;
+  --sheen-b:#5A6C7E;
+  --grid:rgba(15,23,32,.09);
+  --crosshair:rgba(15,23,32,.30);
+  --ok-ink:#0F7A53;
+  --ok-dot:#0E9E6B;
+  --err-dot:#C62B2A;
+  --row-hover:rgba(15,23,32,.04);
+  --shimmer:rgba(255,255,255,.75);
+  /* Categorical slots for the two chart series - do not repurpose. Blue and
+     orange stay distinguishable under deuteranopia and protanopia, and these
+     are darkened from the dark-theme pair so they clear AA on white. */
+  --s1:#1A63BE;   /* neural net */
+  --s2:#AF4214;   /* weather model */
+  --band:rgba(26,99,190,.15);
+  /* UI chrome accent, kept separate from the series colours so that "blue"
+     means the model's prediction and nothing else */
+  --accent:#5A46D6;
+  --accent-glow:rgba(90,70,214,.32);
   --radius:18px;
   /* Inter came from Google Fonts: a third-party request on every load, and
      unavailable offline - so the app fell back to an arbitrary system face
@@ -73,15 +91,18 @@ body::after{
   -webkit-backdrop-filter:blur(10px);
 }
 .brand{display:flex;align-items:center;gap:10px}
+/* the mark is a sun over a temperature curve - the gradient square it replaced
+   carried no meaning and could have belonged to any app */
 .brand-mark{
-  width:22px;height:22px;border-radius:7px;
-  background:linear-gradient(135deg,var(--s1),#8ec2f7);
-  box-shadow:0 0 0 1px rgba(255,255,255,.14) inset, 0 0 22px var(--accent-glow);
+  width:24px;height:24px;display:grid;place-items:center;
+  border-radius:7px;
+  filter:drop-shadow(0 3px 10px var(--accent-glow));
   animation:pulseMark 4.5s var(--ease) infinite;
 }
+.brand-mark svg{display:block}
 @keyframes pulseMark{
-  0%,100%{box-shadow:0 0 0 1px rgba(255,255,255,.14) inset, 0 0 18px rgba(57,135,229,.4)}
-  50%    {box-shadow:0 0 0 1px rgba(255,255,255,.2) inset, 0 0 30px rgba(57,135,229,.72)}
+  0%,100%{filter:drop-shadow(0 3px 9px rgba(90,70,214,.28))}
+  50%    {filter:drop-shadow(0 3px 15px rgba(90,70,214,.52))}
 }
 .brand-name{font-weight:600;font-size:16.5px;letter-spacing:-.015em}
 .model-chip{
@@ -98,10 +119,10 @@ body::after{
 }
 .model-chip:not(.ready):not(.err) .dot{animation:breathe 1.5s ease-in-out infinite}
 @keyframes breathe{0%,100%{opacity:.35}50%{opacity:1}}
-.model-chip.ready{border-color:rgba(27,175,122,.34);color:#cfe9de}
-.model-chip.ready .dot{background:#1baf7a;box-shadow:0 0 10px rgba(27,175,122,.8)}
-.model-chip.err{border-color:rgba(227,73,72,.4)}
-.model-chip.err .dot{background:#e34948;box-shadow:0 0 10px rgba(227,73,72,.7)}
+.model-chip.ready{border-color:rgba(14,158,107,.45);color:var(--ok-ink)}
+.model-chip.ready .dot{background:var(--ok-dot);box-shadow:0 0 10px rgba(27,175,122,.8)}
+.model-chip.err{border-color:rgba(198,43,42,.45)}
+.model-chip.err .dot{background:var(--err-dot);box-shadow:0 0 10px rgba(227,73,72,.7)}
 
 /* ── city selector ──────────────────────────────────────── */
 .cityrow{
@@ -142,7 +163,7 @@ body::after{
 .city-tab:hover{color:var(--ink);border-color:var(--border-str);transform:translateY(-1px)}
 .city-tab:active{transform:translateY(0) scale(.97)}
 .city-tab.is-active{
-  background:linear-gradient(135deg,var(--s1),#2f6fc4);
+  background:var(--accent);
   border-color:transparent;color:#fff;font-weight:600;
   box-shadow:0 6px 20px -6px var(--accent-glow), 0 0 0 1px rgba(255,255,255,.1) inset;
 }
@@ -168,7 +189,7 @@ body::after{
 .sec-head{margin-bottom:16px;padding:0 2px}
 .sec-head h2{
   font-size:21px;font-weight:650;letter-spacing:-.025em;
-  background:linear-gradient(105deg,#b9c1cc 0%,#ffffff 42%,#ffffff 52%,#b9c1cc 94%);
+  background:linear-gradient(105deg,var(--sheen-b) 0%,var(--sheen-a) 42%,var(--sheen-a) 52%,var(--sheen-b) 94%);
   background-size:280% 100%;background-position:100% 0;
   -webkit-background-clip:text;background-clip:text;color:transparent;
 }
@@ -223,7 +244,7 @@ body::after{
 }
 .skel::after{
   content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent);
+  background:linear-gradient(90deg,transparent,var(--shimmer),transparent);
   animation:shimmer 1.4s infinite;
 }
 @keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
@@ -292,11 +313,11 @@ body::after{
 .chart{width:100%;display:block;overflow:visible}
 .chart-note{font-size:12px;color:var(--ink-3);line-height:1.55;margin-top:12px;padding:0 2px;position:relative;z-index:1}
 
-.grid-line{stroke:rgba(255,255,255,.06);stroke-width:1}
+.grid-line{stroke:var(--grid);stroke-width:1}
 .axis-txt{fill:var(--ink-3);font-size:10.5px;font-family:var(--font)}
 .ser-line{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .ser-band{fill:var(--band)}
-.crosshair{stroke:rgba(255,255,255,.3);stroke-width:1;stroke-dasharray:3 3}
+.crosshair{stroke:var(--crosshair);stroke-width:1;stroke-dasharray:3 3}
 .hover-dot{stroke:var(--surface-solid);stroke-width:2}
 
 /* model comparison bars */
@@ -325,7 +346,7 @@ body::after{
   list-style:none;display:flex;align-items:center;justify-content:space-between;
   transition:color .2s var(--ease);position:relative;z-index:1;
 }
-.disclosure summary:hover{color:#fff}
+.disclosure summary:hover{color:var(--ink)}
 .disclosure summary::-webkit-details-marker{display:none}
 .disclosure summary::after{
   content:'+';color:var(--ink-3);font-size:17px;
@@ -373,11 +394,12 @@ body::after{
 .f-value{
   font-size:29px;font-weight:600;margin:8px 0 9px;letter-spacing:-.035em;position:relative;z-index:1;
   font-variant-numeric:tabular-nums;
-  background:linear-gradient(170deg,#fff,#9fb3c9);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
+  /* this was a white-to-grey gradient fill, which disappears on a light
+     ground. a solid token reads the same on dark and survives a theme flip. */
+  color:var(--ink);
 }
-.f-value .vs{font-size:13px;font-weight:400;margin:0 4px;-webkit-text-fill-color:var(--ink-3)}
-.f-value .unit{font-size:15px;font-weight:400;-webkit-text-fill-color:var(--ink-2)}
+.f-value .vs{font-size:13px;font-weight:400;margin:0 4px;color:var(--ink-3)}
+.f-value .unit{font-size:15px;font-weight:400;color:var(--ink-2)}
 .finding p{font-size:12.5px;color:var(--ink-2);line-height:1.6;position:relative;z-index:1}
 
 /* ── table ──────────────────────────────────────────────── */
@@ -386,7 +408,7 @@ body::after{
 .dtable th{color:var(--ink-3);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
 .dtable td{color:var(--ink-2)}
 .dtable tr{transition:background .2s var(--ease)}
-.dtable tbody tr:hover{background:rgba(255,255,255,.035)}
+.dtable tbody tr:hover{background:var(--row-hover)}
 .dtable td:first-child{color:var(--ink)}
 .dtable td.num{text-align:right;font-variant-numeric:tabular-nums}
 
@@ -447,3 +469,126 @@ body::after{
   *{transition:none!important;animation:none!important}
   .reveal{opacity:1;transform:none}
 }
+
+/* ── hero sky ────────────────────────────────────────────────
+   Weather-driven artwork behind the hero. It sits under a scrim so the white
+   text on top keeps its contrast whatever the scene resolves to. */
+.hero-sky{
+  position:absolute;inset:0;z-index:0;border-radius:inherit;
+  overflow:hidden;pointer-events:none;
+}
+.hero-sky .sky{width:100%;height:100%;display:block}
+/* scrim: darkens the lower-left, where the city name and the big number sit */
+.hero-sky::after{
+  content:'';position:absolute;inset:0;
+  background:
+    linear-gradient(100deg, rgba(8,10,14,.86) 0%, rgba(8,10,14,.62) 42%, rgba(8,10,14,.22) 78%),
+    linear-gradient(0deg, rgba(8,10,14,.55), transparent 58%);
+}
+/* the hero's own contents must sit above the artwork */
+.hero-body,.hero-loading{position:relative;z-index:2}
+/* the old warm/cool glow would double up on the scene, so it steps aside */
+.hero[data-sky]::after{opacity:.28}
+
+.sky-drift{animation:skyDrift 42s var(--ease) infinite alternate}
+.sky-drift-2{animation-duration:58s;animation-direction:alternate-reverse}
+@keyframes skyDrift{from{transform:translateX(-10px)}to{transform:translateX(14px)}}
+.sky-stars{animation:skyTwinkle 5.5s ease-in-out infinite alternate}
+@keyframes skyTwinkle{from{opacity:.55}to{opacity:1}}
+.sky-rain{animation:skyRain 1.05s linear infinite}
+@keyframes skyRain{from{transform:translate(0,-22px)}to{transform:translate(-6px,22px)}}
+.sky-snow{animation:skySnow 6s linear infinite}
+@keyframes skySnow{from{transform:translate(0,-26px)}to{transform:translate(-10px,30px)}}
+.sky-snow-far{animation:skySnowFar 11s linear infinite}
+@keyframes skySnowFar{from{transform:translate(0,-20px)}to{transform:translate(8px,26px)}}
+.sky-fog{animation:skyFog 20s var(--ease) infinite alternate}
+@keyframes skyFog{from{transform:translateX(-16px)}to{transform:translateX(16px)}}
+.sky-bolt{animation:skyBolt 6s steps(1,end) infinite}
+.sky-bolt-2{animation-duration:9s;animation-delay:2.4s}
+@keyframes skyBolt{0%,90%{opacity:0}92%{opacity:1}94%{opacity:.15}96%{opacity:.9}100%{opacity:0}}
+.sky-flash{animation:skyFlash 6s steps(1,end) infinite;mix-blend-mode:screen}
+@keyframes skyFlash{0%,90%{opacity:0}92%{opacity:.16}94%{opacity:.02}96%{opacity:.12}100%{opacity:0}}
+
+/* ── hour by hour ────────────────────────────────────────── */
+.hourly{margin-top:10px;padding:14px 0 6px;overflow:hidden}
+.hourly-head{
+  display:flex;align-items:baseline;justify-content:space-between;
+  gap:10px;padding:0 16px 10px;
+}
+.hourly-head h3{font-size:14px;font-weight:640;letter-spacing:-.01em}
+.hourly-hint{font-size:11px;color:var(--ink-3)}
+.hourly-scroll{
+  display:flex;gap:2px;overflow-x:auto;padding:0 12px 8px;
+  scroll-snap-type:x proximity;
+  scrollbar-width:thin;scrollbar-color:var(--border-str) transparent;
+}
+.hourly-scroll::-webkit-scrollbar{height:6px}
+.hourly-scroll::-webkit-scrollbar-thumb{background:var(--border-str);border-radius:3px}
+.hourly-scroll::-webkit-scrollbar-track{background:transparent}
+
+.hr{
+  flex:0 0 auto;width:62px;scroll-snap-align:start;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:9px 2px 8px;border-radius:12px;
+  transition:background .2s var(--ease);
+}
+.hr:hover{background:rgba(255,255,255,.045)}
+.hr.is-now{background:rgba(57,135,229,.14);box-shadow:inset 0 0 0 1px rgba(57,135,229,.34)}
+.hr-t{font-size:11.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.hr.is-now .hr-t{color:var(--ink);font-weight:640}
+.hr-i{height:28px;display:flex;align-items:center}
+.hr-i .wx-i{display:block}
+.hr-deg{font-size:15.5px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.hr-pop{font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.hr-pop.is-wet{color:#68a8e0}
+.hr-pop-blank{height:14px}
+
+/* day divider between 23:00 and 00:00 */
+.hr-div{
+  flex:0 0 auto;align-self:stretch;width:1px;margin:8px 8px 14px;
+  background:var(--border-str);position:relative;
+}
+.hr-div span{
+  position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);
+  font-size:10px;color:var(--ink-3);white-space:nowrap;
+}
+
+@media (max-width:420px){
+  .hr{width:56px}
+}
+@media (prefers-reduced-motion:reduce){
+  .sky-drift,.sky-drift-2,.sky-stars,.sky-rain,.sky-snow,.sky-snow-far,
+  .sky-fog,.sky-bolt,.sky-bolt-2,.sky-flash{animation:none!important}
+  .sky-flash{opacity:0!important}
+}
+
+/* ── light-theme component corrections ───────────────────────
+   Pieces that were drawn for a dark ground and need rebalancing rather than
+   just a token swap. */
+body::before{opacity:.28;filter:blur(48px)}
+body::after{background:radial-gradient(120% 80% at 50% 0%,transparent,var(--bg) 76%)}
+.topbar{background:linear-gradient(var(--bg) 62%,rgba(238,242,246,.78) 86%,transparent)}
+/* on a pale ground separation comes from shadow, not from a hairline border */
+.card{box-shadow:0 1px 2px rgba(15,23,32,.05),0 10px 30px -18px rgba(15,23,32,.35)}
+.card::before{background:linear-gradient(180deg,rgba(255,255,255,.9),transparent 34%)}
+.hover-dot{stroke:#fff}
+.tooltip{background:var(--surface-solid);color:var(--ink);box-shadow:0 10px 30px rgba(15,23,32,.18)}
+.skel{background:#DFE6EC}
+.bottomnav{background:rgba(255,255,255,.93)}
+.model-chip{background:var(--surface-solid)}
+.hr.is-now{background:rgba(90,70,214,.10);box-shadow:inset 0 0 0 1px rgba(90,70,214,.30)}
+.sp-area{fill:rgba(26,99,190,.12)}
+
+/* UI chrome runs on --accent so the chart's blue only ever means "neural net" */
+
+.nav-btn.is-active{color:var(--accent)}
+.nav-btn.is-active::before{background:var(--accent)}
+.disclosure[open] summary::after{color:var(--accent)}
+.sp-now{color:var(--accent)}
+.spark.is-active,.citycard.is-active{border-color:var(--accent)}
+
+/* The hero keeps a dark sky: the weather artwork needs it, and it anchors the
+   page the way a photographic header does on a commercial weather site. */
+.hero .hero-city,.hero .hero-time,.hero .hero-cond,.hero .hero-range{color:#fff}
+.hero .hero-temp{background:linear-gradient(170deg,#fff 20%,#cdd8e4);
+  -webkit-background-clip:text;background-clip:text;color:transparent}

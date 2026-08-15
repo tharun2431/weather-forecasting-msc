@@ -1,5 +1,5 @@
-const CACHE = 'deepweather-v6';
-const ASSETS = ['./','./index.html','./styles.css','./app.js','./ui.js','./manifest.json',
+const CACHE = 'deepweather-v9';
+const ASSETS = ['./','./index.html','./styles.css','./app.js','./ui.js','./wx-visuals.js','./manifest.json',
                 './scaler.json','./lstm_model.onnx','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -32,7 +32,7 @@ self.addEventListener('fetch', e => {
     );
     return;
   }
-  // ignoreSearch so cache-busting query strings (app.js?v=5) still match offline
+  // ignoreSearch so cache-busting query strings (app.js?v=12) still match offline
   e.respondWith(
     caches.match(e.request, { ignoreSearch: true }).then(hit => hit || fetch(e.request))
   );

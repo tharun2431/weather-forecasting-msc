@@ -49,7 +49,7 @@ async function initModel(){
     scaler = await (await fetch('scaler.json')).json();
     ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/';
     session = await ort.InferenceSession.create('lstm_model.onnx');
-    chip.classList.add('ready'); state.textContent = 'neural net ready';
+    chip.classList.add('ready'); state.textContent = 'running on-device';
     return true;
   }catch(e){
     console.error('model load failed', e);
@@ -98,7 +98,7 @@ async function forecast(h, nowIdx){
 async function loadCity(city){
   const u = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}`
     + `&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,pressure_msl,weather_code`
-    + `&hourly=temperature_2m,weather_code,relative_humidity_2m,dew_point_2m,surface_pressure,`
+    + `&hourly=temperature_2m,weather_code,precipitation_probability,relative_humidity_2m,dew_point_2m,surface_pressure,`
     + `wind_speed_10m,wind_direction_10m,wind_gusts_10m`
     + `&daily=temperature_2m_max,temperature_2m_min&timezone=auto&past_days=8&forecast_days=3`;
   const r = await fetch(u);
@@ -184,6 +184,50 @@ function renderNow(city,d){
   ];
   document.getElementById('statGrid').innerHTML = stats.map(([l,v,u])=>
     `<div class="stat"><div class="stat-lab">${l}</div><div class="stat-val">${v}<small>${u}</small></div></div>`).join('');
+
+  // artwork behind the hero, chosen from the current code and the city's own clock
+  const hourNow = +c.time.slice(11,13);
+  const sky = document.getElementById('heroSky');
+  if(window.WXV && sky){
+    sky.innerHTML = WXV.scene(c.weather_code, WXV.isNight(hourNow));
+    document.getElementById('hero').dataset.sky = WXV.group(c.weather_code);
+  }
+}
+
+/* ── render: hour by hour ──────────────────────────────────
+   A chart makes you read an axis to answer "what is it doing at six". This
+   strip answers it directly, and leaves the chart to carry the uncertainty. */
+function renderHourly(d, nowIdx){
+  const strip = document.getElementById('hourlyStrip');
+  if(!strip) return;
+  const H = d.hourly, out = [];
+  for(let k=0; k<=HORIZON; k++){
+    const i = nowIdx + k;
+    if(i >= H.time.length) break;
+    const stamp = H.time[i];
+    const hh    = +stamp.slice(11,13);
+    const t     = H.temperature_2m[i];
+    const code  = H.weather_code[i];
+    const pop   = H.precipitation_probability ? H.precipitation_probability[i] : null;
+    const isNow = k === 0;
+    // a day divider, so 23:00 -> 00:00 does not read as one continuous run
+    const newDay = k > 0 && stamp.slice(8,10) !== H.time[i-1].slice(8,10);
+    const dayName = newDay
+      ? ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][
+          new Date(stamp.slice(0,10)+'T00:00:00Z').getUTCDay()]
+      : '';
+    if(newDay) out.push(`<div class="hr-div" role="presentation"><span>${dayName}</span></div>`);
+    out.push(
+      `<div class="hr${isNow?' is-now':''}" role="listitem" `+
+      `aria-label="${isNow?'Now':hh+':00'}, ${Math.round(t)} degrees, ${WMO[code]??''}">`+
+        `<div class="hr-t">${isNow?'Now':String(hh).padStart(2,'0')+':00'}</div>`+
+        `<div class="hr-i">${window.WXV ? WXV.icon(code, WXV.isNight(hh)) : ''}</div>`+
+        `<div class="hr-deg">${Math.round(t)}°</div>`+
+        (pop==null ? '<div class="hr-pop hr-pop-blank"></div>'
+                   : `<div class="hr-pop${pop>=30?' is-wet':''}">${pop}%</div>`)+
+      `</div>`);
+  }
+  strip.innerHTML = out.join('');
 }
 
 /* ── render: forecast chart ────────────────────────────── */
@@ -323,7 +367,8 @@ function renderModels(){
   MODELS.forEach((m,i)=>{
     const y = M.t + i*rowH, bh = 18;
     const w = m.mae/max*iw;
-    const fill = m.ours ? 'var(--s1)' : 'rgba(255,255,255,.16)';
+    // was a hardcoded white wash, which is invisible on a light ground
+    const fill = m.ours ? 'var(--s1)' : 'var(--bar-muted)';
     parts.push(`<text class="axis-txt" x="${M.l-9}" y="${y+bh/2+3.5}" text-anchor="end">${m.name}</text>`);
     parts.push(`<rect class="md-bar" data-i="${i}" x="${M.l}" y="${y}" width="${w}" height="${bh}" rx="4" fill="${fill}"/>`);
     parts.push(`<text class="axis-txt" x="${M.l+w+7}" y="${y+bh/2+3.5}" style="fill:var(--ink-2)">${m.mae.toFixed(2)}</text>`);
@@ -455,6 +500,7 @@ async function selectCity(city){
     wx = await loadCity(city);
     const i = nowIndex(wx);
     renderNow(city,wx);
+    renderHourly(wx,i);
     renderForecast(wx,i,null);                 // draw immediately
     const pred = await forecast(wx.hourly,i);  // then the neural pass
     if(pred && pred.length) renderForecast(wx,i,pred);
