@@ -487,17 +487,41 @@ async function loadAllCityTemps(){
 }
 
 /* ── flow ──────────────────────────────────────────────── */
-async function selectCity(city){
+
+/* Nothing here refreshed on its own, so a tab left open kept showing whatever
+   was true when it loaded - including an "Now" cell that had drifted into the
+   past. Open-Meteo publishes about hourly, so refetching more often than that
+   gains nothing; this refetches when the tab is looked at again and enough time
+   has passed. */
+let lastFetch = 0;
+const STALE_AFTER = 10 * 60 * 1000;   // 10 minutes
+
+function watchForStaleData(){
+  const maybeRefresh = () => {
+    if(document.hidden) return;
+    if(Date.now() - lastFetch < STALE_AFTER) return;
+    selectCity(current, true);   // refresh in place, no loading flash
+  };
+  document.addEventListener('visibilitychange', maybeRefresh);
+  window.addEventListener('focus', maybeRefresh);
+  // also catch a tab that is simply left in the foreground for a long time
+  setInterval(maybeRefresh, 60 * 1000);
+}
+
+async function selectCity(city, quiet){
   if(!city) return;
   current = city;
   renderCityTabs();
   renderCityGrid();   // re-render so the highlighted card always matches the tab
   renderSparks();
-  document.getElementById('heroBody').hidden = true;
-  document.getElementById('heroLoading').hidden = false;
-  document.getElementById('heroLoading').textContent = `Loading ${city.name}…`;
+  if(!quiet){
+    document.getElementById('heroBody').hidden = true;
+    document.getElementById('heroLoading').hidden = false;
+    document.getElementById('heroLoading').textContent = `Loading ${city.name}…`;
+  }
   try{
     wx = await loadCity(city);
+    lastFetch = Date.now();
     const i = nowIndex(wx);
     renderNow(city,wx);
     renderHourly(wx,i);
@@ -506,7 +530,10 @@ async function selectCity(city){
     if(pred && pred.length) renderForecast(wx,i,pred);
   }catch(e){
     console.error(e);
-    document.getElementById('heroLoading').textContent = 'Could not load conditions. Check your connection.';
+    if(!quiet){
+      document.getElementById('heroLoading').textContent =
+        'Could not load conditions. Check your connection.';
+    }
   }
 }
 
@@ -565,6 +592,7 @@ function observeCharts(){
   loadAllCityTemps();
   await initModel();
   await selectCity(current);
+  watchForStaleData();
   // offline caching only when actually deployed - a service worker on localhost
   // just serves stale files while developing
   const isLocal = ['localhost','127.0.0.1'].includes(location.hostname);
