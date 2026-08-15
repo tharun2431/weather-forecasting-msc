@@ -233,7 +233,13 @@ body::after{
   transition:transform .3s var(--spring), border-color .3s var(--ease);
 }
 .stat:hover{transform:translateY(-2px);border-color:var(--border-str)}
-.stat-lab{font-size:10.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.07em}
+/* icon sits inline with the label and inherits its colour, so the pair reads as
+   one unit and the number below stays the loudest thing in the tile */
+.stat-lab{
+  font-size:10.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.07em;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.stat-lab .stat-i{flex:0 0 auto;opacity:.85}
 .stat-val{font-size:17.5px;font-weight:600;margin-top:6px;letter-spacing:-.015em;font-variant-numeric:tabular-nums}
 .stat-val small{font-size:11px;font-weight:400;color:var(--ink-2);margin-left:1px}
 

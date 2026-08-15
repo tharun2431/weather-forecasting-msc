@@ -211,10 +211,31 @@
            'aria-hidden="true" focusable="false">' + p.join('') + '</svg>';
   }
 
+
+  /* ── stat icons ───────────────────────────────────────────
+     Drawn with currentColor rather than a fixed hex, so they take the colour of
+     the label they sit beside and survive a theme change without edits. */
+  var STAT = {
+    feels:    '<path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z"/><path d="M12 9v6"/>',
+    humidity: '<path d="M12 3.2s5.4 5.6 5.4 9.2a5.4 5.4 0 0 1-10.8 0C6.6 8.8 12 3.2 12 3.2z"/>',
+    wind:     '<path d="M3 8.5h11a2.8 2.8 0 1 0-2.8-2.8"/><path d="M3 15.5h8.6a2.6 2.6 0 1 1-2.6 2.6"/><path d="M3 12h15.2a2.4 2.4 0 1 0-2.4-2.4"/>',
+    pressure: '<path d="M4.2 17.2a9 9 0 1 1 15.6 0"/><path d="M12 13.6l3.8-3.6"/><circle cx="12" cy="14.4" r="1.5" fill="currentColor" stroke="none"/>'
+  };
+
+  function statIcon(name) {
+    var d = STAT[name];
+    if (!d) return '';
+    return '<svg class="stat-i" viewBox="0 0 24 24" width="15" height="15" ' +
+           'fill="none" stroke="currentColor" stroke-width="1.7" ' +
+           'stroke-linecap="round" stroke-linejoin="round" ' +
+           'aria-hidden="true" focusable="false">' + d + '</svg>';
+  }
+
   /* night is decided from the city's own clock, not the viewer's */
   function isNight(localHour) {
     return localHour < 6 || localHour >= 20;
   }
 
-  global.WXV = { icon: icon, scene: scene, group: group, isNight: isNight };
+  global.WXV = { icon: icon, scene: scene, group: group,
+                 isNight: isNight, statIcon: statIcon };
 })(window);

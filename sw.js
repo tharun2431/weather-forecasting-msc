@@ -1,4 +1,4 @@
-const CACHE = 'deepweather-v10';
+const CACHE = 'deepweather-v11';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./ui.js','./wx-visuals.js','./manifest.json',
                 './scaler.json','./lstm_model.onnx','./icon-192.png','./icon-512.png'];
 

@@ -177,13 +177,17 @@ function renderNow(city,d){
     `rgba(${Math.round(57+(217-57)*k)},${Math.round(135+(89-135)*k)},${Math.round(229+(38-229)*k)},.17)`);
 
   const stats = [
-    ['Feels like', Math.round(c.apparent_temperature), '°'],
-    ['Humidity',   Math.round(c.relative_humidity_2m), '%'],
-    ['Wind',       Math.round(c.wind_speed_10m), ' km/h'],
-    ['Pressure',   Math.round(c.pressure_msl), ' hPa'],
+    ['Feels like', Math.round(c.apparent_temperature), '°',      'feels'],
+    ['Humidity',   Math.round(c.relative_humidity_2m), '%',      'humidity'],
+    ['Wind',       Math.round(c.wind_speed_10m), ' km/h',        'wind'],
+    ['Pressure',   Math.round(c.pressure_msl), ' hPa',           'pressure'],
   ];
-  document.getElementById('statGrid').innerHTML = stats.map(([l,v,u])=>
-    `<div class="stat"><div class="stat-lab">${l}</div><div class="stat-val">${v}<small>${u}</small></div></div>`).join('');
+  const ico = n => (window.WXV && WXV.statIcon) ? WXV.statIcon(n) : '';
+  document.getElementById('statGrid').innerHTML = stats.map(([l,v,u,k])=>
+    `<div class="stat">
+       <div class="stat-lab">${ico(k)}<span>${l}</span></div>
+       <div class="stat-val">${v}<small>${u}</small></div>
+     </div>`).join('');
 
   // artwork behind the hero, chosen from the current code and the city's own clock
   const hourNow = +c.time.slice(11,13);
